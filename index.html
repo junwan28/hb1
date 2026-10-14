@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Happy Birthday, My Princess 💜</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. TEMA: ubah warna & font di sini ===== */
+:root{
+  --bg1:#100820; --bg2:#2b1552;
+  --lav:#d9c7ff; --pastel:#c4a8ff; --neon:#b45cff; --glow:#e3a8ff;
+  --pink:#ff8ccf; --text:#f6efff;
+  --font-title:'Playfair Display',Georgia,serif;
+  --font-body:'Poppins',system-ui,sans-serif;
+  --font-script:'Dancing Script',cursive;
+}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;touch-action:manipulation}
+body{font-family:var(--font-body);color:var(--text);
+  background:radial-gradient(120% 90% at 50% 0%,var(--bg2),var(--bg1) 70%)}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.screen{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:max(20px,env(safe-area-inset-top)) 22px max(20px,env(safe-area-inset-bottom));
+  opacity:0;visibility:hidden;transition:opacity .8s,visibility .8s}
+.screen.on{opacity:1;visibility:visible}
+h1{font-family:var(--font-title);font-size:clamp(1.8rem,8vw,2.8rem);line-height:1.2;
+  text-shadow:0 0 18px var(--neon)}
+.script{font-family:var(--font-script);color:var(--glow);font-size:clamp(1.6rem,7vw,2.3rem)}
+.sub{font-weight:300;color:var(--lav);margin:10px 0 22px;font-size:.95rem;max-width:300px}
+.btn{font:500 1rem var(--font-body);color:#fff;border:0;border-radius:999px;padding:14px 34px;min-height:48px;
+  background:linear-gradient(135deg,var(--neon),var(--pink));box-shadow:0 0 22px rgba(180,92,255,.6);
+  animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.chars{display:flex;gap:6px;align-items:flex-end;justify-content:center;margin-bottom:14px}
+.chars svg{width:clamp(84px,26vw,120px);height:auto;filter:drop-shadow(0 0 12px rgba(224,168,255,.55));animation:float 3s ease-in-out infinite}
+.chars svg+svg{animation-delay:-1.4s}
+@keyframes float{50%{transform:translateY(-8px)}}
+
+/* ===== Mini-game ===== */
+#field{position:absolute;inset:90px 0 130px;touch-action:manipulation}
+.star{position:absolute;width:56px;height:56px;border:0;background:none;font-size:42px;line-height:56px;
+  color:var(--neon);text-shadow:0 0 14px var(--neon),0 0 28px var(--glow);animation:twinkle .9s infinite alternate;
+  transform:translate(-50%,-50%)}
+.star.pop{animation:pop .35s forwards}
+@keyframes twinkle{to{transform:translate(-50%,-50%) scale(1.25)}}
+@keyframes pop{to{transform:translate(-50%,-50%) scale(2.4);opacity:0}}
+#hud{position:absolute;top:max(22px,env(safe-area-inset-top));left:0;right:0;text-align:center}
+#kuro{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);transition:transform .25s}
+#kuro svg{width:100px;display:block;filter:drop-shadow(0 0 12px rgba(224,168,255,.6))}
+#kuro.hop{transform:translateX(-50%) translateY(-18px) scale(1.1)}
+#bubble{position:absolute;bottom:108px;left:50%;transform:translateX(-50%);background:#fff;color:#2b1552;
+  border-radius:14px;padding:6px 12px;font-size:.8rem;white-space:nowrap;opacity:0;transition:opacity .3s}
+#bubble.on{opacity:1}
+
+/* ===== Layar bintang ===== */
+#cap{position:absolute;bottom:max(46px,env(safe-area-inset-bottom));left:0;right:0;font-family:var(--font-script);
+  font-size:clamp(1.5rem,6.5vw,2rem);color:var(--glow);text-shadow:0 0 14px var(--neon);transition:opacity .6s}
+
+/* ===== Pesan ===== */
+#card{width:100%;max-width:420px;max-height:92%;overflow-y:auto;padding:22px 20px 26px;border-radius:26px;
+  background:rgba(30,12,60,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(196,168,255,.35);box-shadow:0 0 40px rgba(180,92,255,.35)}
+#card .chars svg{width:clamp(64px,20vw,84px)}
+#cd{font-size:.8rem;color:var(--lav);margin:4px 0 14px}
+#txt p{font-size:.95rem;line-height:1.75;margin-bottom:10px;font-weight:300;min-height:1.2em;text-align:left}
+#txt p:first-child{font-family:var(--font-script);font-size:1.7rem;color:var(--glow);text-align:center}
+#sign{font-family:var(--font-script);font-size:1.6rem;color:var(--pink);margin-top:8px;opacity:0;transition:opacity 1.5s}
+#sign.on{opacity:1}
+.caret::after{content:"▍";color:var(--glow);animation:blink .8s infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ===== Tombol musik & toast ===== */
+#music{position:fixed;z-index:5;top:max(14px,env(safe-area-inset-top));right:14px;width:48px;height:48px;border-radius:50%;
+  border:1px solid var(--pastel);background:rgba(43,21,82,.7);display:grid;place-items:center;font-size:22px;color:#fff;
+  box-shadow:0 0 14px rgba(180,92,255,.5)}
+#music.playing{animation:pulse 1.2s infinite;background:linear-gradient(135deg,var(--neon),var(--pink))}
+#toast{position:fixed;z-index:6;bottom:24px;left:50%;transform:translateX(-50%);background:#fff;color:#2b1552;
+  padding:8px 16px;border-radius:12px;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:90%}
+#toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<audio id="bgm" loop preload="none"></audio>
+
+<!-- Karakter kartun (SVG buatan sendiri, warna asli: Kitty putih-merah, Kuromi hitam-pink) -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="kitty" viewBox="0 0 100 100">
+    <path d="M16 40 L14 10 L44 22Z M84 40 L86 10 L56 22Z" fill="#fff" stroke="#333" stroke-width="2.5" stroke-linejoin="round"/>
+    <ellipse cx="50" cy="58" rx="40" ry="31" fill="#fff" stroke="#333" stroke-width="2.5"/>
+    <ellipse cx="32" cy="58" rx="3.2" ry="4.2" fill="#222"/><ellipse cx="68" cy="58" rx="3.2" ry="4.2" fill="#222"/>
+    <ellipse cx="50" cy="65" rx="5.5" ry="3.8" fill="#ffcf33" stroke="#333" stroke-width="1.5"/>
+    <path d="M8 56 L24 60 M8 68 L24 65 M92 56 L76 60 M92 68 L76 65" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    <path d="M72 24 L56 12 L56 36Z M72 24 L90 12 L90 36Z" fill="#e8365d" stroke="#333" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="72" cy="24" r="6" fill="#ff5c80" stroke="#333" stroke-width="2"/>
+  </symbol>
+  <symbol id="kuromi" viewBox="0 0 100 100">
+    <path d="M24 42 Q4 6 30 12 Q44 16 44 34Z" fill="#2b2233" stroke="#111" stroke-width="2"/>
+    <path d="M76 42 Q98 2 70 12 Q56 16 56 34Z" fill="#2b2233" stroke="#111" stroke-width="2"/>
+    <path d="M24 36 Q14 14 29 17 Q36 20 38 32Z M76 36 Q90 12 71 17 Q64 20 62 32Z" fill="#b45cff"/>
+    <ellipse cx="50" cy="58" rx="38" ry="32" fill="#2b2233" stroke="#111" stroke-width="2"/>
+    <ellipse cx="50" cy="66" rx="29" ry="21" fill="#fff"/>
+    <circle cx="50" cy="38" r="8" fill="#ff6fae"/><circle cx="47" cy="37" r="1.8" fill="#222"/><circle cx="53" cy="37" r="1.8" fill="#222"/>
+    <circle cx="37" cy="63" r="3.5" fill="#222"/><circle cx="63" cy="63" r="3.5" fill="#222"/>
+    <circle cx="30" cy="72" r="4" fill="#ffb0d6" opacity=".8"/><circle cx="70" cy="72" r="4" fill="#ffb0d6" opacity=".8"/>
+    <ellipse cx="50" cy="69" rx="3.5" ry="2.5" fill="#ffc94d"/>
+    <path d="M44 76 Q50 81 56 76" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </symbol>
+</defs></svg>
+
+<button id="music" aria-label="Putar / jeda musik">♡</button>
+<div id="toast"></div>
+
+<!-- LAYAR 1: pembuka -->
+<section class="screen on" id="s-intro">
+  <div class="chars"><svg><use href="#kitty"/></svg><svg><use href="#kuromi"/></svg></div>
+  <p class="script">Ada kejutan untukmu…</p>
+  <h1 id="introName"></h1>
+  <p class="sub">Ketuk tombol di bawah, ya. Nyalakan suara HP-mu 🎧</p>
+  <button class="btn" id="start">Buka Kejutan 💜</button>
+</section>
+
+<!-- LAYAR 2: mini-game -->
+<section class="screen" id="s-game">
+  <div id="hud"><p class="script">Bantu Kuromi menangkap bintang ungu!</p><p class="sub" style="margin:4px auto 0">⭐ <b id="cnt">0</b> / <span id="need"></span></p></div>
+  <div id="field"></div>
+  <div id="bubble">Yay! ✨</div>
+  <div id="kuro"><svg viewBox="0 0 100 100"><use href="#kuromi"/></svg></div>
+</section>
+
+<!-- LAYAR 3: animasi rasi bintang -->
+<section class="screen" id="s-stars"><p id="cap"></p></section>
+
+<!-- LAYAR 4: pesan utama -->
+<section class="screen" id="s-msg">
+  <div id="card">
+    <div class="chars"><svg><use href="#kitty"/></svg><svg><use href="#kuromi"/></svg></div>
+    <h1 id="msgTitle"></h1>
+    <p id="cd"></p>
+    <div id="txt"></div>
+    <p id="sign"></p>
+  </div>
+</section>
+
+<script>
+/* =====================================================
+   2. KONFIGURASI — edit parameter di sini saja
+   ===================================================== */
+const CONFIG = {
+  name: 'Veronica Aurellya',
+  nickname: 'my princess',
+  birthday: { month: 10, day: 28 },       // 28 Oktober
+
+  // --- Mini-game ---
+  game: {
+    starsNeeded: 5,        // jumlah bintang yang harus ditangkap
+    spawnEveryMs: 750,     // jeda munculnya bintang baru (lebih kecil = lebih ramai)
+    starLifetimeMs: 2400,  // berapa lama bintang bertahan sebelum hilang
+    cheers: ['Yay! ✨', 'Hebat! 💜', 'Satu lagi!', 'Kamu jago!', 'Hampir! 🌟']
+  },
+
+  // --- Animasi rasi bintang ---
+  anim: {
+    particlesMobile: 110,  // jumlah bintang di HP (kurangi jika terasa berat)
+    particlesDesktop: 190,
+    driftMs: 2200,         // lama bintang melayang bebas
+    heartMs: 4200,         // lama bentuk hati bertahan
+    flowerMs: 4600,        // lama bentuk bunga bertahan
+    ease: 0.04,            // kecepatan berkumpul (0.02 lambat – 0.1 cepat)
+    lineDist: 60,          // jarak maksimal garis rasi antar bintang
+    colors: { drift: [225, 210, 255], heart: [255, 160, 230], flower: [185, 100, 255] },
+    captions: ['Bintang-bintang mulai berkumpul…', 'membentuk hati untukmu…', 'lalu mekar menjadi bunga 💜']
+  },
+
+  // --- Efek mengetik ---
+  typing: { speedMs: 38, linePauseMs: 650 },
+
+  // --- Musik ---
+  // Taruh file lagu (mp3) milikmu di folder yang sama, lalu isi nama file-nya.
+  // Contoh lagu: "d4vd - Romantic Homicide", "Ed Sheeran - Perfect", "Arthur Nery - Pagsamo"
+  music: { src: '123.mp3', volume: 0.6 },
+
+  // --- Pesan romantis (baris pertama = sapaan) ---
+  lines: [
+    'Hai, {nick} 💜',
+    'Hari ini bintang-bintang berkumpul hanya untuk satu alasan: memastikan kamu tahu betapa istimewanya dirimu.',
+    'Kamu adalah cahaya paling lembut di langit malamku — tenang, hangat, dan selalu membuatku merasa pulang.',
+    'Terima kasih sudah hadir, tertawa bersamaku, dan mengubah hari-hari biasa menjadi dongeng kecil.',
+    'Setiap bunga yang mekar mengingatkanku pada senyummu.',
+    'Selamat ulang tahun, {name}. Semoga semua doa baikmu terbang tinggi dan satu per satu menjadi nyata.'
+  ],
+  signature: 'Dengan seluruh sayangku, ♡'
+};
+
+/* ===== Util ===== */
+const $ = s => document.querySelector(s);
+const fill = t => t.replace('{name}', CONFIG.name).replace('{nick}', CONFIG.nickname);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function show(id){ document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
+function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('on'); setTimeout(()=>e.classList.remove('on'),2200); }
+
+$('#introName').textContent = CONFIG.name;
+$('#msgTitle').textContent = 'Happy Birthday!';
+$('#need').textContent = CONFIG.game.starsNeeded;
+
+/* ===== Musik ===== */
+const bgm = $('#bgm'), mbtn = $('#music');
+if (CONFIG.music.src) bgm.src = CONFIG.music.src;
+bgm.volume = CONFIG.music.volume;
+async function toggleMusic(force){
+  if (!CONFIG.music.src) { if(!force) toast('Isi CONFIG.music.src dengan file lagumu 🎵'); return; }
+  try {
+    if (bgm.paused) { await bgm.play(); mbtn.classList.add('playing'); mbtn.textContent='♥'; }
+    else if (!force) { bgm.pause(); mbtn.classList.remove('playing'); mbtn.textContent='♡'; }
+  } catch(e){ toast('Ketuk tombol musik untuk memutar 🎶'); }
+}
+mbtn.onclick = () => toggleMusic();
+
+/* ===== Mini-game: tangkap bintang ungu ===== */
+function playGame(){
+  return new Promise(resolve => {
+    const G = CONFIG.game, field = $('#field'), kuro = $('#kuro'), bub = $('#bubble');
+    let got = 0, timer;
+    function spawn(){
+      const b = document.createElement('button');
+      b.className = 'star'; b.textContent = '★'; b.setAttribute('aria-label','bintang');
+      b.style.left = (12 + Math.random()*76) + '%';
+      b.style.top  = (8 + Math.random()*84) + '%';
+      const kill = setTimeout(() => b.remove(), G.starLifetimeMs);
+      b.onpointerdown = e => {
+        e.preventDefault(); clearTimeout(kill); b.classList.add('pop'); setTimeout(()=>b.remove(),350);
+        got++; $('#cnt').textContent = got;
+        kuro.classList.add('hop'); setTimeout(()=>kuro.classList.remove('hop'),250);
+        bub.textContent = G.cheers[(got-1) % G.cheers.length]; bub.classList.add('on'); setTimeout(()=>bub.classList.remove('on'),900);
+        if (navigator.vibrate) navigator.vibrate(30);
+        if (got >= G.starsNeeded) { clearInterval(timer); setTimeout(resolve, 700); }
+      };
+      field.appendChild(b);
+    }
+    spawn(); timer = setInterval(spawn, G.spawnEveryMs);
+  });
+}
+
+/* =====================================================
+   3. ANIMASI RASI BINTANG (Canvas)
+   drift → heart → flower
+   ===================================================== */
+const cv = $('#bg'), ctx = cv.getContext('2d');
+let W, H, P = [], phase = 'drift', col = [...CONFIG.anim.colors.drift], last = performance.now();
+
+function heartXY(t){ return [16*Math.sin(t)**3, -(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))]; }
+
+function buildTargets(){
+  const n = P.length, cx = W/2, cy = H*0.42;
+  const hs = Math.min(W*0.82/34, H*0.5/30);          // skala hati
+  const R  = Math.min(W*0.44, H*0.27);               // radius bunga
+  P.forEach((p,i) => {
+    const layer = i % 3, k = (i/3|0) / (n/3), t = k * Math.PI * 2;
+    // Hati (3 lapisan)
+    const [hx,hy] = heartXY(t), ls = [1,.72,.46][layer];
+    p.hx = cx + hx*hs*ls; p.hy = cy + hy*hs*ls + hs*2;
+    // Bunga 5 kelopak (2 lapisan) + inti di tengah
+    if (i % 7 === 0) { const a = Math.random()*6.283, r = R*.13*Math.sqrt(Math.random()); p.fx = cx+Math.cos(a)*r; p.fy = cy+Math.sin(a)*r; }
+    else { const r = R*(.35+.65*Math.abs(Math.sin(2.5*t)))*(layer===0?1:.6); p.fx = cx+Math.cos(t)*r; p.fy = cy+Math.sin(t)*r; }
+  });
+}
+function resize(){
+  const d = Math.min(devicePixelRatio||1, 2);
+  W = innerWidth; H = innerHeight; cv.width = W*d; cv.height = H*d; ctx.setTransform(d,0,0,d,0,0);
+  const A = CONFIG.anim, n = W < 700 ? A.particlesMobile : A.particlesDesktop;
+  if (P.length !== n) P = Array.from({length:n}, () => ({
+    x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35,
+    r:.7+Math.random()*1.7, ph:Math.random()*6.283 }));
+  buildTargets();
+}
+addEventListener('resize', resize); resize();
+
+function frame(now){
+  const dt = Math.min((now-last)/1000, .05); last = now;
+  const A = CONFIG.anim, k = 1 - Math.pow(1-A.ease, dt*60), tc = A.colors[phase];
+  for (let i=0;i<3;i++) col[i] += (tc[i]-col[i])*.03;
+  ctx.clearRect(0,0,W,H);
+  const shaped = phase !== 'drift', ld = shaped ? A.lineDist*.7 : A.lineDist, ld2 = ld*ld;
+  for (const p of P){
+    p.ph += dt*2;
+    if (phase === 'drift'){ p.x += p.vx; p.y += p.vy; if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0; }
+    else { const tx = phase==='heart'?p.hx:p.fx, ty = phase==='heart'?p.hy:p.fy;
+           p.x += (tx-p.x)*k + Math.sin(p.ph)*.12; p.y += (ty-p.y)*k + Math.cos(p.ph)*.12; }
+  }
+  const c = `${col[0]|0},${col[1]|0},${col[2]|0}`;
+  ctx.lineWidth = .6;
+  for (let i=0;i<P.length;i++){ const a=P[i];
+    for (let j=i+1;j<P.length;j++){ const b=P[j], dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy;
+      if (d2 < ld2){ ctx.strokeStyle = `rgba(${c},${(1-d2/ld2)*.45})`; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } } }
+  for (const p of P){ const tw = .55+.45*Math.sin(p.ph*1.5);
+    ctx.fillStyle = `rgba(${c},${.25*tw})`; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*3,0,6.283); ctx.fill();   // glow
+    ctx.fillStyle = `rgba(${c},${.5+.5*tw})`; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.283); ctx.fill(); }  // bintang
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+async function playConstellation(){
+  const A = CONFIG.anim, cap = $('#cap');
+  const say = t => { cap.style.opacity = 0; setTimeout(()=>{ cap.textContent = t; cap.style.opacity = 1; }, 350); };
+  phase = 'drift';  say(A.captions[0]); await sleep(A.driftMs);
+  phase = 'heart';  say(A.captions[1]); await sleep(A.heartMs);
+  phase = 'flower'; say(A.captions[2]); await sleep(A.flowerMs);
+}
+
+/* ===== Pesan: efek mengetik ===== */
+async function typeMessage(){
+  const box = $('#txt'); box.innerHTML = '';
+  for (const raw of CONFIG.lines){
+    const p = document.createElement('p'); p.classList.add('caret'); box.appendChild(p);
+    for (const ch of fill(raw)){ p.textContent += ch; await sleep(CONFIG.typing.speedMs); if (box.parentElement) $('#card').scrollTop = 9999; }
+    p.classList.remove('caret'); await sleep(CONFIG.typing.linePauseMs);
+  }
+  $('#sign').textContent = CONFIG.signature; $('#sign').classList.add('on');
+}
+
+/* Hitung mundur ulang tahun */
+function countdown(){
+  const n = new Date(), y = n.getFullYear(), b = CONFIG.birthday;
+  let t = new Date(y, b.month-1, b.day);
+  const today = new Date(y, n.getMonth(), n.getDate());
+  if (t < today) t = new Date(y+1, b.month-1, b.day);
+  const d = Math.round((t - today)/864e5);
+  $('#cd').textContent = d === 0 ? '🎂 Hari ini hari istimewamu! 🎂' : `${d} hari lagi menuju 28 Oktober ✨`;
+}
+
+/* ===== Alur utama ===== */
+$('#start').onclick = async () => {
+  toggleMusic(true);                     // musik mulai dari ketukan pertama (aturan autoplay browser)
+  show('s-game'); await playGame();
+  show('s-stars'); await playConstellation();
+  countdown(); show('s-msg'); typeMessage();
+};
+</script>
+</body>
+</html>
